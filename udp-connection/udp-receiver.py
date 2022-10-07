@@ -15,13 +15,14 @@ def listen():
         while True:      
                 
             data, addr = sock.recvfrom(8192) # buffer size is 1024 bytes
-            header = data[:2]
+            
+            #header = data[:2]
             data = data[2:]
-            print(struct.unpack('h',header))
+            
             print(pickle.loads(data))
     except:
         listen()    
 listen()
-    
+   
         
     
