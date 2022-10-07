@@ -27,6 +27,7 @@ LENGTH = []
 
 
 def detect(save_img=False):
+    
     source, weights, view_img, save_txt, imgsz = opt.source, opt.weights, opt.view_img, opt.save_txt, opt.img_size
     webcam = source.isnumeric() or source.endswith('.txt') or source.lower().startswith(
         ('rtsp://', 'rtmp://', 'http://'))
@@ -184,7 +185,7 @@ def detect(save_img=False):
 def ReturnCoordinates():
     try:
 
-        return COORDINATES
+        return LENGTH, COORDINATES
 
     except exception:
         print("Critical error occured try detecting first")
@@ -249,12 +250,16 @@ if __name__ == '__main__':
                     data, addr = sock.recvfrom(1024)
                     header = struct.unpack('h', data[:2])[0]
                     if header == 5:
-
                         detect()
-                        strip_optimizer(opt.weights)
-                        ReturnCoordinates()
-                        print(type(pickle.dumps(COORDINATES)))
-                        sock.sendto(pickle.dumps(COORDINATES), ("127.0.0.2", 5000))
+                        length,coord = ReturnCoordinates()
+                        COORDINATES = []
+                        LENGTH = []
+                        print(type(pickle.dumps(coord)))
+                        print(LENGTH)
+                        sock.sendto(pickle.dumps(length[0]),("127.0.0.2", 5000))
+                        middlepoints = getMiddle(coord)                    
+                        for point in middlepoints:
+                            sock.sendto(pickle.dumps(point),("127.0.0.2", 5000))
 
                 # server()
                 # time.sleep(3)
@@ -268,10 +273,12 @@ if __name__ == '__main__':
                 header = struct.unpack('h', data[:2])[0]
                 if header == 5:
                     detect()
-                    ReturnCoordinates()
-                    print(type(pickle.dumps(COORDINATES)))
-                    print(LENGTH)
-                    sock.sendto(pickle.dumps(LENGTH[0]),("127.0.0.2", 5000))
-                    middlepoints = getMiddle(COORDINATES)                    
+                    length,coord = ReturnCoordinates()
+                    COORDINATES = []
+                    LENGTH = []
+                    print(type(pickle.dumps(coord)))
+                    print(length)
+                    sock.sendto(pickle.dumps(length[0]),("127.0.0.2", 5000))
+                    middlepoints = getMiddle(coord)                    
                     for point in middlepoints:
                         sock.sendto(pickle.dumps(point),("127.0.0.2", 5000))
